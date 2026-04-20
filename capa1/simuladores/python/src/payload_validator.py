@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -10,7 +11,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_PATH = Path(__file__).parent.parent.parent.parent / "comun" / "payload_schema_v1.json"
+SCHEMA_PATH = Path(os.environ.get("COMUN_DIR", "/app/comun")) / "payload_schema_v1.json"
 
 
 class PayloadValidator:

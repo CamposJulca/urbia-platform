@@ -1,0 +1,6 @@
+2026-04-20 03:09:01,045 [INFO] urbia.main — Nodo 192.168.0.103 — 50 medidores asignados
+2026-04-20 03:09:01,496 [INFO] mqtt_publisher — Conectado a 192.168.0.101:1883
+2026-04-20 03:09:04,435 [INFO] urbia.main — Conectado a 192.168.0.101:1883 — iniciando simulación
+2026-04-20 03:10:04,679 [INFO] urbia.main — Ciclo 12 — enviados:50/50 total_pub:570 tasa_valid:100.0%
+2026-04-20 03:11:09,984 [INFO] urbia.main — Ciclo 24 — enviados:50/50 total_pub:1175 tasa_valid:100.0%
+2026-04-20 03:12:15,201 [INFO] urbia.main — Ciclo 36 — enviados:50/50 total_pub:1776 tasa_valid:100.0%

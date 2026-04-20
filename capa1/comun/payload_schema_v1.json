@@ -12,7 +12,7 @@
   "properties": {
     "device_id": {
       "type": "string",
-      "pattern": "^urbia-(cen|chi|ena|pal|pgr|uni)-(mono|tri)-[0-9]{4}$",
+      "pattern": "^urbia-(cen|chi|ena|pal|pgr|uni)-(mon|tri)-[0-9]{4}$",
       "description": "ID único del medidor. Formato: urbia-{zona_corta}-{tipo}-{NNNN}"
     },
     "device_type": {
