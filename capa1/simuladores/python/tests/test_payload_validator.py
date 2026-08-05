@@ -1,3 +1,4 @@
+import math
 import pytest
 import sys
 from pathlib import Path
@@ -11,7 +12,7 @@ v = PayloadValidator()
 def payload_valido():
     ahora = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
     return {
-        "device_id":       "urbia-cen-mono-0001",
+        "device_id":       "urbia-cen-mon-0001",
         "device_type":     "mono",
         "zona":            "centro",
         "timestamp_utc":   ahora,
@@ -41,7 +42,7 @@ def test_payload_trifasico_valido():
         "zona":            "la_enea",
         "corriente_a":     25.0,
         "factor_potencia": 0.88,
-        "potencia_kw":     round(220.5 * 25.0 * 0.88 / 1000, 4),
+        "potencia_kw":     round(math.sqrt(3) * 220.5 * 25.0 * 0.88 / 1000, 4),
         "nodo_origen":     "192.168.0.104",
         "lenguaje":        "cpp"
     })
@@ -60,7 +61,7 @@ def test_todas_las_zonas_validas():
     for zona, cod in mapa.items():
         p = payload_valido()
         p["zona"] = zona
-        p["device_id"] = f"urbia-{cod}-mono-0001"
+        p["device_id"] = f"urbia-{cod}-mon-0001"
         ok, msg = v.validar(p)
         assert ok, f"Zona '{zona}' rechazada: {msg}"
 
@@ -100,7 +101,8 @@ def test_campo_adicional_no_permitido():
 def test_estadisticas():
     vv = PayloadValidator()
     vv.validar(payload_valido())
-    p_malo = payload_valido(); del p_malo["device_id"]
+    p_malo = payload_valido()
+    del p_malo["device_id"]
     vv.validar(p_malo)
     s = vv.estadisticas()
     assert s["total_procesados"] == 2

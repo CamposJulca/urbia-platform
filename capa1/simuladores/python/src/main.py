@@ -13,8 +13,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from sensor_monofasico import SensorMonofasico
+from sensor_trifasico  import SensorTrifasico
 from mqtt_publisher    import MQTTPublisher
 from payload_validator import PayloadValidator
+
+
+def _crear_sensor(m: dict, seed: int):
+    cls = SensorTrifasico if m["device_type"] == "trifasico" else SensorMonofasico
+    return cls(m["device_id"], seed=seed)
 
 # ── Configuración via variables de entorno ──────────────────────
 BROKER_HOST  = os.getenv("BROKER_HOST",   "192.168.0.101")
@@ -46,8 +52,7 @@ def main():
     medidores_info = cargar_medidores()
     logger.info(f"Nodo {NODE_ID} — {len(medidores_info)} medidores asignados")
 
-    sensores   = [SensorMonofasico(m["device_id"], seed=SEED_BASE+i)
-                  for i, m in enumerate(medidores_info)]
+    sensores   = [_crear_sensor(m, SEED_BASE + i) for i, m in enumerate(medidores_info)]
     publisher  = MQTTPublisher(BROKER_HOST, BROKER_PORT, "urbia-sim-103")
     validator  = PayloadValidator()
 

@@ -1,8 +1,11 @@
 import json
 import logging
+import math
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+
+_SQRT3 = math.sqrt(3)
 
 try:
     from jsonschema import validate, ValidationError
@@ -53,11 +56,12 @@ class PayloadValidator:
         if not (57.0 <= f <= 63.0):
             raise ValueError(f"frecuencia_hz={f} fuera de rango (57–63Hz)")
 
-        p_calc = payload["voltaje_v"] * payload["corriente_a"] * payload["factor_potencia"] / 1000
+        factor_fase = _SQRT3 if payload.get("device_type") == "trifasico" else 1.0
+        p_calc = factor_fase * payload["voltaje_v"] * payload["corriente_a"] * payload["factor_potencia"] / 1000
         p_decl = payload["potencia_kw"]
         if p_decl > 0 and abs(p_calc - p_decl) / max(p_calc, 0.001) > 0.20:
             raise ValueError(
-                f"potencia_kw={p_decl} incoherente con V×I×fp={p_calc:.3f}kW (diferencia >20%)"
+                f"potencia_kw={p_decl} incoherente con {'√3·' if factor_fase > 1 else ''}V×I×fp={p_calc:.3f}kW (diferencia >20%)"
             )
 
         ts = datetime.fromisoformat(payload["timestamp_utc"].replace("Z", "+00:00"))
