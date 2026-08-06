@@ -1,27 +1,48 @@
+# UrbIA — simulador Python. Reparto de instancias por nodo:
+#
+#   nodo          host             compose                        estado
+#   192.168.0.103 neusi-edge-x86   el suyo, en esa máquina        corriendo
+#   192.168.0.104 (sin asignar)    —                              pendiente
+#   192.168.0.105 neusi-stage      este archivo                   corriendo
+#
+# Cada instancia se declara SOLO en el compose de su nodo. Este archivo
+# declara únicamente .105: no agregar aquí servicios de otros nodos, o se
+# corre el riesgo de levantar un duplicado del mismo medidor. Los medidores
+# salen del catálogo comun/medidores_manizales.json filtrando por NODE_ID.
+name: urbia-sim-python
+
 services:
-  simulator-python:
+  simulator-python-105:
     build:
-      context: /opt/urbia
+      context: /home/pruebas/urbia-platform
       dockerfile: capa1/simuladores/python/Dockerfile
-    container_name: urbia-sim-python
+    image: urbia/sim-python:0.3.0
+    container_name: urbia-sim-105
     restart: unless-stopped
     environment:
       - BROKER_HOST=192.168.40.12
       - BROKER_PORT=1883
-      - NODE_ID=192.168.0.103
+      - NODE_ID=192.168.0.105
       - INTERVALO_SEG=5
       - LOG_LEVEL=INFO
-      - SEED_BASE=42
+      - SEED_BASE=142
+      # MQTT_CLIENT_ID por defecto sale del NODE_ID (→ urbia-sim-105);
+      # solo hace falta fijarlo si dos instancias comparten NODE_ID.
     volumes:
-      - ./logs:/app/logs
+      - ./logs/105:/app/logs
     networks:
-      - urbia-sim
+      - urbia-sim-net
     healthcheck:
       test: ["CMD", "python3", "-c", "import paho.mqtt.client; print('ok')"]
       interval: 30s
       timeout: 10s
       retries: 3
 
+# Red propia de los simuladores Python: no se reutiliza urbia-network
+# (backend/DB) ni urbia-simulators_simulator-net. El tráfico sale por NAT
+# del host hacia el broker en 192.168.40.12, así que no hace falta
+# compartir red con el backend.
 networks:
-  urbia-sim:
-    external: true
+  urbia-sim-net:
+    name: urbia-sim-net
+    driver: bridge

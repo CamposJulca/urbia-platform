@@ -1,7 +1,8 @@
 """
-UrbIA — Simulador Python · Nodo .103
-Publica telemetría de 50 medidores monofásicos (Centro y Chipre)
-al broker MQTT en .101:1883
+UrbIA — Simulador Python
+Publica la telemetría de los medidores del catálogo cuyo `nodo_origen`
+coincide con NODE_ID (mono y/o trifásicos) al broker MQTT.
+Una instancia por nodo; todo se configura por variables de entorno.
 """
 import json
 import logging
@@ -30,6 +31,14 @@ INTERVALO    = float(os.getenv("INTERVALO_SEG", "5"))
 LOG_LEVEL    = os.getenv("LOG_LEVEL",     "INFO")
 SEED_BASE    = int(os.getenv("SEED_BASE", "42"))
 
+# client_id MQTT: único por instancia. Con clean_session=False dos clientes
+# con el mismo id se expulsan mutuamente del broker en bucle, así que el
+# default se deriva del último octeto del NODE_ID (.103 → urbia-sim-103) y
+# se puede sobreescribir con MQTT_CLIENT_ID.
+MQTT_CLIENT_ID = os.getenv(
+    "MQTT_CLIENT_ID", f"urbia-sim-{NODE_ID.rsplit('.', 1)[-1]}"
+)
+
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL),
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
@@ -53,12 +62,15 @@ def main():
     logger.info(f"Nodo {NODE_ID} — {len(medidores_info)} medidores asignados")
 
     sensores   = [_crear_sensor(m, SEED_BASE + i) for i, m in enumerate(medidores_info)]
-    publisher  = MQTTPublisher(BROKER_HOST, BROKER_PORT, "urbia-sim-103")
+    publisher  = MQTTPublisher(BROKER_HOST, BROKER_PORT, MQTT_CLIENT_ID)
     validator  = PayloadValidator()
 
     publisher.conectar()
     time.sleep(2)
-    logger.info(f"Conectado a {BROKER_HOST}:{BROKER_PORT} — iniciando simulación")
+    logger.info(
+        f"Conectado a {BROKER_HOST}:{BROKER_PORT} "
+        f"(client_id={MQTT_CLIENT_ID}) — iniciando simulación"
+    )
 
     running = [True]
     def stop(sig, frame):
