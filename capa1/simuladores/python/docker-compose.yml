@@ -6,7 +6,7 @@ services:
     container_name: urbia-sim-python
     restart: unless-stopped
     environment:
-      - BROKER_HOST=192.168.0.101
+      - BROKER_HOST=192.168.40.12
       - BROKER_PORT=1883
       - NODE_ID=192.168.0.103
       - INTERVALO_SEG=5

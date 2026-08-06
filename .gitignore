@@ -20,3 +20,5 @@ logs/*.log
 # OS
 .DS_Store
 Thumbs.db
+capa1/simuladores/python/logs/
+*.bak-*
